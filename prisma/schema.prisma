@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  subdomain String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services  Service[]
+  incidents Incident[]
+  members   TeamMember[]
+}
+
+model Service {
+  id             String        @id @default(cuid())
+  name           String
+  description    String
+  status         String
+  organizationId String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  incidents      Incident[]    @relation("ServiceIncidents")
+}
+
+model Incident {
+  id             String           @id @default(cuid())
+  title          String
+  description    String
+  status         String
+  severity       String
+  organizationId String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  resolvedAt     DateTime?
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  services       Service[]        @relation("ServiceIncidents")
+  updates        IncidentUpdate[]
+}
+
+model IncidentUpdate {
+  id         String   @id @default(cuid())
+  incidentId String
+  message    String
+  status     String
+  createdAt  DateTime @default(now())
+  incident   Incident @relation(fields: [incidentId], references: [id])
+}
+
+model TeamMember {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  role           String
+  email          String
+  name           String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
