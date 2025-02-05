@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
-import { auth } from '@clerk/nextjs';
+import { auth } from "@clerk/nextjs/server";
 import { StatusGrid } from '@/components/status/status-grid';
 import { prisma } from '@/lib/db';
 
 export default async function HomePage() {
-  const { userId } = auth();
+  const { userId } =  await auth();
   if (userId) redirect('/dashboard');
 
   const services = await prisma.service.findMany({
